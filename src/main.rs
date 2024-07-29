@@ -1,6 +1,15 @@
 use rust_kms::KmsEncryption;
 use std::{path::Path,env};
 
+fn help() {
+    eprintln!("\nusage:
+rust_kms encrypt <file> <kms_id>
+    Encrypts a file content to STDOUT with the given kms_id
+rust_kms decrypt <file>
+    Decrypts the file content to STDOUT
+");
+}
+
 #[tokio::main]
 async fn main() {
     let kms_encryption = KmsEncryption::new().await;
@@ -21,6 +30,7 @@ async fn main() {
                 },
                 _ => {
                     eprintln!("Operation not supported");
+                    help();
                 }
             }
         },
@@ -39,11 +49,13 @@ async fn main() {
                 },
                 _ => {
                     eprintln!("Operation not supported");
+                    help();
                 }
             }
         },
         _ => {
             eprintln!("Wrong combination of arguments");
+            help();
         }
 
     }
