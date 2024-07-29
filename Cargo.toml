@@ -1,0 +1,15 @@
+[package]
+name = "rust_kms"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+aws-sdk-kms = "1.0"
+aws-config = "1.0"
+base64 = "0.13"
+
+[profile.release]
+opt-level = "s"
+lto = true
+panic = "abort"
