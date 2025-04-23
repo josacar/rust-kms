@@ -12,8 +12,8 @@ rust_kms decrypt <file>
 
 #[tokio::main]
 async fn main() {
-    let kms_encryption = KmsEncryption::new().await;
     let args: Vec<String> = env::args().collect();
+    let kms_encryption = KmsEncryption::new();
 
     match args.len() {
         3 => {
@@ -23,7 +23,7 @@ async fn main() {
 
             match &operation[..] {
                 "decrypt" => {
-                    match kms_encryption.decrypt_file(path).await {
+                    match kms_encryption.await.decrypt_file(path).await {
                         Ok(_) => eprintln!("File decrypted successfully"),
                         Err(e) => eprintln!("Failed to decrypt file: {:?}", e),
                     }
@@ -42,7 +42,7 @@ async fn main() {
 
             match &operation[..] {
                 "encrypt" => {
-                    match kms_encryption.encrypt_file(key_id, path).await {
+                    match kms_encryption.await.encrypt_file(key_id, path).await {
                         Ok(_) => eprintln!("File encrypted successfully"),
                         Err(e) => eprintln!("Failed to encrypt file: {:?}", e),
                     }
