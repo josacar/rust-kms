@@ -15,11 +15,11 @@ jobs:
       matrix:
         BUILD_TARGET: [release] # refers to a cargo profile
         platform:
-          - os-name: Linux-x86_64
+          - os-name: linux-x86_64
             runs-on: ubuntu-24.04
             target: x86_64-unknown-linux-musl
 
-          - os-name: Linux-aarch64
+          - os-name: linux-aarch64
             runs-on: ubuntu-24.04-arm
             target: aarch64-unknown-linux-musl
 
@@ -45,5 +45,6 @@ jobs:
     #   run: cargo test --verbose
     - uses: actions/upload-artifact@v4
       with:
+        name: rust_kms-${{ matrix.platform.target }}
         path: target/release/rust_kms
         
