@@ -1,0 +1,37 @@
+name: Build and upload
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        BUILD_TARGET: [release] # refers to a cargo profile
+        
+    steps:
+    - uses: actions/checkout@v4
+    - name: Cache
+      uses: actions/cache@v4
+      with:
+        path: |
+         ~/.cargo/registry
+         ~/.cargo/git
+         target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+    - name: Build
+      run: cargo build --profile ${{ matrix.BUILD_TARGET }}
+    - name: Run tests
+      run: cargo test --verbose
+    - uses: actions/upload-artifact@v4
+      with:
+        path: target/release/rust_kms
+        
