@@ -1,62 +1,52 @@
 use rust_kms::KmsEncryption;
-use std::{path::Path,env};
+use std::path::Path;
+use clap::{Parser, Subcommand};
 
-fn help() {
-    eprintln!("\nusage:
-rust_kms encrypt <file> <kms_id>
-    Encrypts a file content to STDOUT with the given kms_id
-rust_kms decrypt <file>
-    Decrypts the file content to STDOUT
-");
+/// KMS Encryption Tool
+#[derive(Parser, Debug)]
+#[clap(author = "Jose Luis Salas", version = "0.1.0", about = "Encrypts/decrypts files using KMS", long_about = None)]
+struct Cli {
+    #[clap(subcommand)]
+    command: Commands,
+}
+
+#[derive(Subcommand, Debug)]
+enum Commands {
+    #[clap(about = "Encrypts a file using KMS")]
+    Encrypt {
+        #[clap(help = "File to encrypt")]
+        file: String,
+        #[clap(help = "KMS key ID")]
+        key_id: String,
+    },
+    #[clap(about = "Decrypts a file using KMS")]
+    Decrypt {
+        #[clap(help = "File to decrypt")]
+        file: String,
+    },
 }
 
 #[tokio::main]
 async fn main() {
-    let args: Vec<String> = env::args().collect();
-    let kms_encryption = KmsEncryption::new();
+    let cli = Cli::parse();
 
-    match args.len() {
-        3 => {
-            let operation = &args[1];
-            let file_path = &args[2];
-            let path = Path::new(file_path);
-
-            match &operation[..] {
-                "decrypt" => {
-                    match kms_encryption.await.decrypt_file(path).await {
-                        Ok(_) => eprintln!("File decrypted successfully"),
-                        Err(e) => eprintln!("Failed to decrypt file: {:?}", e),
-                    }
-                },
-                _ => {
-                    eprintln!("Operation not supported");
-                    help();
-                }
+    match cli.command {
+        Commands::Encrypt { file, key_id } => {
+            let path = Path::new(&file);
+            let kms_encryption = KmsEncryption::new();
+            match kms_encryption.await.encrypt_file(&key_id, path).await {
+                Ok(_) => eprintln!("File encrypted successfully"),
+                Err(e) => eprintln!("Failed to encrypt file: {:?}", e),
             }
-        },
-        4 => {
-            let operation = &args[1];
-            let file_path = &args[2];
-            let key_id = &args[3];
-            let path = Path::new(file_path);
-
-            match &operation[..] {
-                "encrypt" => {
-                    match kms_encryption.await.encrypt_file(key_id, path).await {
-                        Ok(_) => eprintln!("File encrypted successfully"),
-                        Err(e) => eprintln!("Failed to encrypt file: {:?}", e),
-                    }
-                },
-                _ => {
-                    eprintln!("Operation not supported");
-                    help();
-                }
-            }
-        },
-        _ => {
-            eprintln!("Wrong combination of arguments");
-            help();
         }
-
+        Commands::Decrypt { file } => {
+            let path = Path::new(&file);
+            let kms_encryption = KmsEncryption::new();
+            match kms_encryption.await.decrypt_file(path).await {
+                Ok(_) => eprintln!("File decrypted successfully"),
+                Err(e) => eprintln!("Failed to decrypt file: {:?}", e),
+            }
+        }
     }
 }
+
