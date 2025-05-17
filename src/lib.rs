@@ -34,9 +34,11 @@ impl KmsEncryption {
             .expect("Failed to get the blob");
 
         let bytes = ciphertext_blob.as_ref();
-        let result = io::stdout().write_all(bytes).unwrap();
+        io::stdout().write_all(bytes).
+            expect("Error writing encrypted file");
 
-        Ok(result)
+
+        Ok(())
     }
 
     pub async fn decrypt_file(&self, file_path: &Path) -> Result<(), Error> {
@@ -54,8 +56,9 @@ impl KmsEncryption {
         let plaintext = decrypt_output.plaintext
             .expect("Failed to get plaintext");
 
-        let result = io::stdout().write_all(plaintext.as_ref()).unwrap();
+        io::stdout().write_all(plaintext.as_ref()).
+            expect("Error writing decrypted file");
 
-        Ok(result)
+        Ok(())
     }
 }
